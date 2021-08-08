@@ -1,16 +1,24 @@
+using AutoMapper;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using storeYourNotes_webApi.Entities;
+using storeYourNotes_webApi.Models;
+using storeYourNotes_webApi.Models.Validators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 
 namespace storeYourNotes_webApi
 {
@@ -32,6 +40,11 @@ namespace storeYourNotes_webApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "storeYourNotes_webApi", Version = "v1" });
             });
+            services.AddAutoMapper(this.GetType().Assembly);
+            services.AddControllers().AddFluentValidation();
+            services.AddScoped<IValidator<PageQuery>, PageQueryValidator>();
+            services.AddDbContext<StoreYourNotesDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StoreYourNotesDbConnection")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -21,6 +21,8 @@ namespace storeYourNotes_webApi.Models.Validators
                         context.AddFailure("RecordsPackageSize", $"Must be in [{string.Join(",", allowedRecordSizes)}]");
                     }
                 });
+            RuleFor(x => x.PageId)
+                .GreaterThanOrEqualTo(1);
         }
     }
 }

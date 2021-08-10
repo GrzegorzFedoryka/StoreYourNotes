@@ -7,6 +7,7 @@ namespace storeYourNotes_webApi.Models
 {
     public class PageQuery
     {
+        public int PageId { get; set; }
         public int RecordsPackageNumber { get; set; }
         public int RecordsPackageSize { get; set; }
     }

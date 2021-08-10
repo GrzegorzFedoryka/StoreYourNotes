@@ -21,8 +21,8 @@ namespace storeYourNotes_webApi.Controllers
         [HttpGet]
         public ActionResult GetPageContent([FromQuery]PageQuery pageQuery)
         {
-            _pageService.GetPageContent(pageQuery);
-            return Ok();
+            var pagedRecords = _pageService.GetPageContent(pageQuery);
+            return Ok(pagedRecords);
         }
     }
 }

@@ -8,6 +8,6 @@ namespace storeYourNotes_webApi.Models
     public class PageRecord
     {
         public PageRecordType Type { get; set; }
-        public string JsonText { get; set; }
+        public string Contents { get; set; }
     }
 }

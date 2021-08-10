@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using storeYourNotes_webApi.Entities;
 using storeYourNotes_webApi.Models;
 using System;
 using System.Collections.Generic;
@@ -10,22 +11,27 @@ namespace storeYourNotes_webApi.Services
 {
     public interface IPageService
     {
-        void GetPageContent(PageQuery pageQuery);
+        PagedResult<PageRecord> GetPageContent(PageQuery pageQuery);
     }
 
     public class PageService : IPageService
     {
         private readonly IMapper _mapper;
-        private readonly DbContext _dbContext;
+        private readonly StoreYourNotesDbContext _dbContext;
 
-        public PageService(IMapper mapper, DbContext dbContext)
+        public PageService(IMapper mapper, StoreYourNotesDbContext dbContext)
         {
             _mapper = mapper;
             _dbContext = dbContext;
         }
-        public void GetPageContent(PageQuery pageQuery)
+        public PagedResult<PageRecord> GetPageContent(PageQuery pageQuery)
         {
-            
+            var page = _dbContext
+                .Pages
+                .FirstOrDefault(p => p.Id == pageQuery.PageId);
+
+            var pageContents = page.PageContents;
+            //TODO convert JSON to PageRecord list
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using storeYourNotes_webApi.Entities;
+using storeYourNotes_webApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,8 @@ namespace storeYourNotes_webApi
     {
         public StoreYourNotesMappingProfile()
         {
-            
+            CreateMap<CreatePageDto, Page>();
+            CreateMap<CreateOwnerDto, Owner>();
         }
     }
 }

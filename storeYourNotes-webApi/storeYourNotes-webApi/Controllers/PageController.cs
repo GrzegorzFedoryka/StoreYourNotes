@@ -18,10 +18,19 @@ namespace storeYourNotes_webApi.Controllers
         {
             _pageService = pageService;
         }
-        [HttpGet]
-        public ActionResult GetPageContent([FromQuery]PageQuery pageQuery)
+
+        [HttpPost]
+        public ActionResult CreatePage([FromBody]CreatePageDto dto)
         {
-            var pagedRecords = _pageService.GetPageContent(pageQuery);
+            var pageId = _pageService.CreatePage(dto);
+
+            return Created($"/{pageId}", null);
+        }
+
+        [HttpGet("{pageId}")]
+        public ActionResult GetPageContent([FromRoute]int pageId, [FromQuery]PageQuery pageQuery)
+        {
+            var pagedRecords = _pageService.GetPageContent(pageId, pageQuery);
             return Ok(pagedRecords);
         }
     }

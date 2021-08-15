@@ -9,7 +9,8 @@ namespace storeYourNotes_webApi.Entities
     {
         public int Id { get; set; }
         public string PageContents { get; set; }
-        public string OwnerId { get; set; }
         public int PageUpId { get; set; }
+        public int OwnerId { get; set; }
+        public virtual Owner Owner { get; set; }
     }
 }

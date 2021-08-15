@@ -7,6 +7,8 @@ namespace storeYourNotes_webApi.Models
 {
     public enum PageRecordType
     {
-
+        TEXT,
+        IMAGE,
+        SUBPAGE
     }
 }

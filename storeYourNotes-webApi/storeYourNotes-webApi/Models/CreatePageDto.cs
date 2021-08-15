@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace storeYourNotes_webApi.Models
 {
-    public class PageQuery
+    public class CreatePageDto
     {
-        public int RecordsPackageNumber { get; set; }
-        public int RecordsPackageSize { get; set; }
+        public int PageUpId { get; set; }
+        public int OwnerId { get; set; }
     }
 }

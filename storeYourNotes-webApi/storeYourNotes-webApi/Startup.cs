@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using storeYourNotes_webApi.Entities;
 using storeYourNotes_webApi.Models;
 using storeYourNotes_webApi.Models.Validators;
+using storeYourNotes_webApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,8 @@ namespace storeYourNotes_webApi
             });
             services.AddAutoMapper(this.GetType().Assembly);
             services.AddControllers().AddFluentValidation();
+            services.AddScoped<IPageService, PageService>();
+            services.AddScoped<IOwnerService, OwnerService>();
             services.AddScoped<IValidator<PageQuery>, PageQueryValidator>();
             services.AddDbContext<StoreYourNotesDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StoreYourNotesDbConnection")));
 

@@ -13,11 +13,18 @@ namespace storeYourNotes_webApi.Entities
             
         }
         public DbSet<Page> Pages { get; set; }
+        public DbSet<Owner> Owners { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Page>()
                 .Property(p => p.OwnerId)
+                .IsRequired();
+            modelBuilder.Entity<Owner>()
+                .Property(p => p.Email)
+                .IsRequired();
+            modelBuilder.Entity<Owner>()
+                .Property(p => p.Nickname)
                 .IsRequired();
         }
     }

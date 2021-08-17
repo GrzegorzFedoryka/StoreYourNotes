@@ -28,10 +28,16 @@ namespace storeYourNotes_webApi.Controllers
         }
 
         [HttpGet("{pageId}")]
-        public ActionResult GetPageContent([FromRoute]int pageId, [FromQuery]PageQuery pageQuery)
+        public ActionResult GetPageContents([FromRoute]int pageId, [FromQuery]PageQuery pageQuery)
         {
-            var pagedRecords = _pageService.GetPageContent(pageId, pageQuery);
+            var pagedRecords = _pageService.GetPageContents(pageId, pageQuery);
             return Ok(pagedRecords);
+        }
+        [HttpPut("{pageId}")]
+        public ActionResult UpdatePageContents([FromRoute]int pageId, [FromBody]string contents)
+        {
+            _pageService.UpdatePageContents(pageId, contents);
+            return Ok($"/{pageId}");
         }
     }
 }

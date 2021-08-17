@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using storeYourNotes_webApi.Entities;
+using storeYourNotes_webApi.Middleware;
 using storeYourNotes_webApi.Models;
 using storeYourNotes_webApi.Models.Validators;
 using storeYourNotes_webApi.Services;
@@ -47,7 +49,7 @@ namespace storeYourNotes_webApi
             services.AddScoped<IOwnerService, OwnerService>();
             services.AddScoped<IValidator<PageQuery>, PageQueryValidator>();
             services.AddDbContext<StoreYourNotesDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StoreYourNotesDbConnection")));
-
+            services.AddScoped<ErrorHandlingMiddleware>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,6 +61,8 @@ namespace storeYourNotes_webApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "storeYourNotes_webApi v1"));
             }
+
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
             app.UseHttpsRedirection();
 

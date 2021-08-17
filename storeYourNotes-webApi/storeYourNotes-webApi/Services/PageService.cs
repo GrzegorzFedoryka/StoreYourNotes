@@ -13,8 +13,9 @@ namespace storeYourNotes_webApi.Services
 {
     public interface IPageService
     {
-        PagedResult<PageRecord> GetPageContent(int pageId, PageQuery pageQuery);
+        PagedResult<PageRecord> GetPageContents(int pageId, PageQuery pageQuery);
         public int CreatePage(CreatePageDto dto);
+        public void UpdatePageContents(int pageId, string contents);
     }
 
     public class PageService : IPageService
@@ -37,9 +38,8 @@ namespace storeYourNotes_webApi.Services
             var id = page.Id;
 
             return id;
-
         }
-        public PagedResult<PageRecord> GetPageContent(int pageId, PageQuery pageQuery)
+        public PagedResult<PageRecord> GetPageContents(int pageId, PageQuery pageQuery)
         {
             var page = _dbContext
                 .Pages
@@ -49,12 +49,12 @@ namespace storeYourNotes_webApi.Services
             {
                 throw new NotFoundException("Page not found");
             }
-            if (string.IsNullOrEmpty(page.PageContents))
-            {
-                throw new NotFoundException("There is no contents");
-            }
             var allPageContents = page.PageContents;
-            List<PageRecord> pageRecords = JsonConvert.DeserializeObject<List<PageRecord>>(allPageContents);
+            List<PageRecord> pageRecords = new();
+            if (!string.IsNullOrEmpty(allPageContents))
+            {
+                pageRecords = JsonConvert.DeserializeObject<List<PageRecord>>(allPageContents);
+            }
 
             var pagedPageRecords = pageRecords
                 .Skip(pageQuery.RecordsPackageSize * (pageQuery.RecordsPackageNumber - 1))
@@ -70,10 +70,9 @@ namespace storeYourNotes_webApi.Services
 
             return result;
         }
-
-        private Exception NotFoundException()
+        public void UpdatePageContents(int pageId, string contents)
         {
-            throw new NotImplementedException();
+            var page = //TODO 
         }
     }
 }

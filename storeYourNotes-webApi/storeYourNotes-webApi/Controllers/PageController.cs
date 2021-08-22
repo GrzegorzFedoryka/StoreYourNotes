@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using storeYourNotes_webApi.Entities;
 using storeYourNotes_webApi.Models;
 using storeYourNotes_webApi.Services;
 using System;
@@ -34,9 +35,9 @@ namespace storeYourNotes_webApi.Controllers
             return Ok(pagedRecords);
         }
         [HttpPut("{pageId}")]
-        public ActionResult UpdatePageContents([FromRoute]int pageId, [FromBody]string contents)
+        public ActionResult UpdatePageContents([FromRoute]int pageId, [FromBody]List<PageRecordDto> pageRecords)
         {
-            _pageService.UpdatePageContents(pageId, contents);
+            _pageService.UpdatePageContents(pageId, pageRecords);
             return Ok($"/{pageId}");
         }
     }

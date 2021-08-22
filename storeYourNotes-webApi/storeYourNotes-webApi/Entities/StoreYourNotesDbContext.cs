@@ -14,6 +14,7 @@ namespace storeYourNotes_webApi.Entities
         }
         public DbSet<Page> Pages { get; set; }
         public DbSet<Owner> Owners { get; set; }
+        public DbSet<PageRecord> PageRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,6 +26,12 @@ namespace storeYourNotes_webApi.Entities
                 .IsRequired();
             modelBuilder.Entity<Owner>()
                 .Property(p => p.Nickname)
+                .IsRequired();
+            modelBuilder.Entity<PageRecord>()
+                .Property(p => p.Type)
+                .IsRequired();
+            modelBuilder.Entity<PageRecord>()
+                .Property(p => p.PageId)
                 .IsRequired();
         }
     }

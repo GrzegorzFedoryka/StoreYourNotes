@@ -15,7 +15,7 @@ namespace storeYourNotes_webApi.Services
     {
         PagedResult<PageRecord> GetPageContents(int pageId, PageQuery pageQuery);
         public int CreatePage(CreatePageDto dto);
-        public void UpdatePageContents(int pageId, string contents);
+        public void UpdatePageContents(int pageId, List<PageRecordDto> pageRecords);
     }
 
     public class PageService : IPageService
@@ -41,27 +41,16 @@ namespace storeYourNotes_webApi.Services
         }
         public PagedResult<PageRecord> GetPageContents(int pageId, PageQuery pageQuery)
         {
-            var page = _dbContext
-                .Pages
-                .FirstOrDefault(p => p.Id == pageId);
+            var page = FindPage(pageId);
 
-            if(page is null)
-            {
-                throw new NotFoundException("Page not found");
-            }
-            var allPageContents = page.PageContents;
-            List<PageRecord> pageRecords = new();
-            if (!string.IsNullOrEmpty(allPageContents))
-            {
-                pageRecords = JsonConvert.DeserializeObject<List<PageRecord>>(allPageContents);
-            }
+            var allPageRecords = page.PageRecords;
 
-            var pagedPageRecords = pageRecords
+            var pagedPageRecords = allPageRecords
                 .Skip(pageQuery.RecordsPackageSize * (pageQuery.RecordsPackageNumber - 1))
                 .Take(pageQuery.RecordsPackageSize)
                 .ToList();
 
-            var recordsCount = pageRecords.Count;
+            var recordsCount = allPageRecords.Count;
 
             var pageSize = pageQuery.RecordsPackageSize;
             var pageNumber = pageQuery.RecordsPackageNumber;
@@ -70,9 +59,36 @@ namespace storeYourNotes_webApi.Services
 
             return result;
         }
-        public void UpdatePageContents(int pageId, string contents)
+        public void UpdatePageContents(int pageId, List<PageRecordDto> pageRecords)
         {
-            var page = //TODO 
+            var page = FindPage(pageId);
+
+            foreach (var pageRecord in pageRecords)
+            {
+                if(pageRecord.Action == PageRecordAction.UPDATE)
+                {
+                    if( page.PageRecords.Count <= pageRecord.Id)
+                    {
+                        throw new NotFoundException("Page record doesn't exist");
+                    }
+                    //TODO
+                }
+            }
+        }
+
+        private Page FindPage(int pageId)
+        {
+            var page = _dbContext
+                .Pages
+                .Include(p => p.PageRecords)
+                .FirstOrDefault(p => p.Id == pageId);
+
+            if (page is null)
+            {
+                throw new NotFoundException("Page not found");
+            }
+
+            return page;
         }
     }
 }

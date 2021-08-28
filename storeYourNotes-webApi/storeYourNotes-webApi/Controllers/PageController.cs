@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace storeYourNotes_webApi.Controllers
 {
@@ -20,6 +21,12 @@ namespace storeYourNotes_webApi.Controllers
             _pageService = pageService;
         }
 
+        [HttpGet]
+        public ActionResult GetPages()
+        {
+            var pages = _pageService.GetPages();
+            return Ok(pages);
+        }
         [HttpPost]
         public ActionResult CreatePage([FromBody]CreatePageDto dto)
         {
@@ -35,10 +42,16 @@ namespace storeYourNotes_webApi.Controllers
             return Ok(pagedRecords);
         }
         [HttpPut("{pageId}")]
-        public ActionResult UpdatePageContents([FromRoute]int pageId, [FromBody]List<PageRecordDto> pageRecords)
+        public ActionResult UpdatePageRecords([FromRoute]int pageId, [FromBody]List<PageRecordDto> pageRecords)
         {
-            _pageService.UpdatePageContents(pageId, pageRecords);
+            _pageService.UpdatePageRecords(pageId, pageRecords);
             return Ok($"/{pageId}");
+        }
+        [HttpPost("{pageId}")]
+        public ActionResult CreatePageRecords([FromRoute] int pageId, [FromBody] List<PageRecordDto> pageRecords)
+        {
+            _pageService.CreatePageRecords(pageId, pageRecords);
+            return Ok();
         }
     }
 }

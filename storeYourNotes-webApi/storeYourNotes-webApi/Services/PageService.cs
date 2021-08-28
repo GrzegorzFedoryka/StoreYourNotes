@@ -15,7 +15,10 @@ namespace storeYourNotes_webApi.Services
     {
         PagedResult<PageRecord> GetPageContents(int pageId, PageQuery pageQuery);
         public int CreatePage(CreatePageDto dto);
-        public void UpdatePageContents(int pageId, List<PageRecordDto> pageRecords);
+        public void UpdatePageRecords(int pageId, List<PageRecordDto> pageRecords);
+        public void CreatePageRecords(int pageId, List<PageRecordDto> pageRecords);
+        public List<Page> GetPages();
+
     }
 
     public class PageService : IPageService
@@ -39,6 +42,14 @@ namespace storeYourNotes_webApi.Services
 
             return id;
         }
+        public List<Page> GetPages()
+        {
+            var pages = _dbContext
+                .Pages
+                .Include(p => p.PageRecords)
+                .ToList();
+            return pages;
+        }
         public PagedResult<PageRecord> GetPageContents(int pageId, PageQuery pageQuery)
         {
             var page = FindPage(pageId);
@@ -59,23 +70,106 @@ namespace storeYourNotes_webApi.Services
 
             return result;
         }
-        public void UpdatePageContents(int pageId, List<PageRecordDto> pageRecords)
+        public void CreatePageRecords(int pageId, List<PageRecordDto> pageRecords)
         {
             var page = FindPage(pageId);
-
-            foreach (var pageRecord in pageRecords)
+            List<PageRecord> newPageRecords = new();
+            foreach (var pageRecordDto in pageRecords)
             {
-                if(pageRecord.Action == PageRecordAction.UPDATE)
+                var newPageRecord = _mapper.Map<PageRecord>(pageRecordDto);
+
+                var previousPageRecord = FindPreviousRecord(pageRecordDto.PreviousRecordId);
+                if (previousPageRecord != null)
                 {
-                    if( page.PageRecords.Count <= pageRecord.Id)
-                    {
-                        throw new NotFoundException("Page record doesn't exist");
-                    }
-                    //TODO
+                    newPageRecord.NextRecordId = previousPageRecord.NextRecordId;
                 }
+                else
+                {
+                    var nextPageRecord = FindNextRecord(null);
+                    if (nextPageRecord != null)
+                    {
+                        newPageRecord.NextRecordId = nextPageRecord.Id;
+                    }
+                    else
+                    {
+                        newPageRecord.NextRecordId = null;
+                    }
+                }
+
+                newPageRecord.PageId = page.Id;
+                newPageRecord.Id = 0;
+                _dbContext.PageRecords.Add(newPageRecord);
+
+                newPageRecords.Add(newPageRecord);
             }
+
+            _dbContext.SaveChanges();
+
+            UpdateAdjacentRecords(newPageRecords);
+
+            _dbContext.SaveChanges();
         }
 
+        public void UpdatePageRecords(int pageId, List<PageRecordDto> pageRecords)
+        {
+            //var page = FindPage(pageId);
+
+            foreach (var pageRecordDto in pageRecords)
+            {
+                var pageRecord = _dbContext
+                    .PageRecords
+                    .FirstOrDefault(r => r.Id == pageRecordDto.Id);
+
+                if (pageRecord is null)
+                {
+                    RollbackChanges();
+                    throw new NotAcceptableException("Page record(s) don't exist, can't update");
+                }
+
+                var nextRecordId = pageRecord.NextRecordId;
+                var previousRecordId = pageRecord.PreviousRecordId;
+                var recordId = pageRecord.Id;
+                _dbContext.PageRecords.Update(pageRecord);
+                _mapper.Map(pageRecordDto, pageRecord);
+
+                pageRecord.NextRecordId = nextRecordId;
+                pageRecord.PreviousRecordId = previousRecordId;
+                pageRecord.Id = recordId;
+                pageRecord.PageId = pageId;
+
+                _dbContext.PageRecords.Update(pageRecord);
+            }
+
+            _dbContext.SaveChanges();
+        }
+
+        private PageRecord FindPreviousRecord(int? previousRecordId)
+        {
+            var previousPageRecord = previousRecordId != null ?
+                        _dbContext
+                        .PageRecords
+                        .FirstOrDefault(r => r.Id == previousRecordId) :
+                        null;
+            return previousPageRecord;
+        }
+        private PageRecord FindNextRecord(int? previousRecordId)
+        {
+            var nextPageRecord = _dbContext
+                        .PageRecords
+                        .FirstOrDefault(previousRecordId != null ?
+                            r => r.PreviousRecordId == previousRecordId :
+                            r => r.PreviousRecordId == null);
+            return nextPageRecord;
+        }
+        private PageRecord FindNextRecord(int? previousRecordId, int exceptId)
+        {
+            var nextPageRecord = _dbContext
+                        .PageRecords
+                        .FirstOrDefault(previousRecordId != null ?
+                            r => r.PreviousRecordId == previousRecordId :
+                            r => r.PreviousRecordId == null && r.Id != exceptId);
+            return nextPageRecord;
+        }
         private Page FindPage(int pageId)
         {
             var page = _dbContext
@@ -89,6 +183,49 @@ namespace storeYourNotes_webApi.Services
             }
 
             return page;
+        }
+
+        private void RollbackChanges()
+        {
+            var dbChangedEntries = _dbContext.ChangeTracker.Entries()
+                .Where(c => c.State != EntityState.Unchanged)
+                .ToList();
+
+            foreach (var entry in dbChangedEntries)
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Modified:
+                        entry.CurrentValues.SetValues(entry.OriginalValues);
+                        entry.State = EntityState.Unchanged;
+                        break;
+                    case EntityState.Added:
+                        entry.State = EntityState.Detached;
+                        break;
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Unchanged;
+                        break;
+                }
+            }
+        }
+        private void UpdateAdjacentRecords(List<PageRecord> addedRecords)
+        {
+            foreach (var record in addedRecords)
+            {
+                var previousRecord = FindPreviousRecord(record.PreviousRecordId);
+                if (previousRecord != null)
+                {
+                    previousRecord.NextRecordId = record.Id;
+                    _dbContext.PageRecords.Update(previousRecord);
+                }
+
+                var nextRecord = FindNextRecord(record.PreviousRecordId, record.Id);
+                if (nextRecord != null)
+                {
+                    nextRecord.PreviousRecordId = record.Id;
+                    _dbContext.PageRecords.Update(nextRecord);
+                }
+            }
         }
     }
 }

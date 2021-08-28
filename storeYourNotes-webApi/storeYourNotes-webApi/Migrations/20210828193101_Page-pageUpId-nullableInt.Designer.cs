@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using storeYourNotes_webApi.Entities;
 
 namespace storeYourNotes_webApi.Migrations
 {
     [DbContext(typeof(StoreYourNotesDbContext))]
-    partial class StoreYourNotesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210828193101_Page-pageUpId-nullableInt")]
+    partial class PagepageUpIdnullableInt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,9 +80,8 @@ namespace storeYourNotes_webApi.Migrations
                     b.Property<int?>("PreviousRecordId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

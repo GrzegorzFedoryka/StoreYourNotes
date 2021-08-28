@@ -14,6 +14,8 @@ namespace storeYourNotes_webApi
         {
             CreateMap<CreatePageDto, Page>();
             CreateMap<CreateOwnerDto, Owner>();
+            CreateMap<PageRecordDto, PageRecord>()
+                .ForMember(x => x.Id, opt => opt.Ignore());
         }
     }
 }
